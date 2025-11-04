@@ -261,6 +261,57 @@ class FACL:
             self.logger.warning(f"Error retrieving groups for user {user}: {e}")
             return []
 
+    def get_applicable_acl(self, acl: str) -> list:
+        """
+        Return the first applicable ACL for a given user or group. Lookup order is:
+        - owner
+        - named users
+        - owning group
+        - named groups
+        - others
+
+        TODO: Currently, owner user and group are overwritten and could in rare cases lead to incorrect results (for example if an owning user is also a named user with different permissions that are listed first).  # noqa: E501
+        https://www.usenix.org/legacy/publications/library/proceedings/usenix03/tech/freenix03/full_papers/gruenbacher/gruenbacher_html/main.html#:~:text=How%20ACLs%20Work,one%20of%20these%20two%20classes.  # noqa: E501
+        """
+        acl_entry = self._parse_acl(acl)
+        entity_type = acl_entry["type"]
+        name = acl_entry["name"]
+
+        # check user
+        if entity_type in ["user"]:
+            for acl in self.acls:
+                if acl["default"]:
+                    continue
+                if acl["type"] == "user" and acl["name"] == name:
+                    return acl
+
+        # check groups
+        if entity_type in ["user", "group"]:
+            if entity_type == "user":
+                groups = self._infer_groups(name)
+            else:
+                groups = [name]
+            for acl in self.acls:
+                if acl["default"]:
+                    continue
+                if acl["type"] == "group" and acl["name"] in groups:
+                    return acl
+
+        # check other
+        if entity_type in ["user", "group", "other"]:
+            for acl in self.acls:
+                if acl["default"]:
+                    continue
+                if acl["type"] == "other":
+                    return acl
+
+        msg = f"""
+        No applicable ACL found for entity type '{entity_type}' and name '{name}'.
+        This should not happen as 'other' ACL should always be present.
+        """
+        self.logger.warning(msg)
+        return None
+
     def has_permission(self, acl: str, mode: str = "at_least") -> bool:
         """
         Check if a specific user or group has a certain permission.
@@ -273,34 +324,13 @@ class FACL:
         """
         # parse acl
         acl_entry = self._parse_acl(acl)
-        entity_type = acl_entry["type"]
-        name = acl_entry["name"]
-        permission = acl_entry["permissions"]
 
-        # check user
-        if entity_type in ["user"]:
-            for acl in self.acls:
-                if acl["default"]:
-                    continue
-                if acl["type"] == "user" and acl["name"] == name:
-                    return self._permission_match(acl["permissions"], permission, mode)
-        # check groups
-        if entity_type in ["user", "group"]:
-            if entity_type == "user":
-                groups = self._infer_groups(name)
-            else:
-                groups = [name]
-            for acl in self.acls:
-                if acl["default"]:
-                    continue
-                if acl["type"] == "group" and acl["name"] in groups:
-                    return self._permission_match(acl["permissions"], permission, mode)
+        # get applicable acls
+        applicable_acl = self.get_applicable_acl(acl)
+        if not applicable_acl:
+            return False
 
-        # check other
-        if entity_type in ["user", "group", "other"]:
-            for acl in self.acls:
-                if acl["default"]:
-                    continue
-                if acl["type"] == "other":
-                    return self._permission_match(acl["permissions"], permission, mode)
-        return False
+        # check permission
+        return self._permission_match(
+            applicable_acl["permissions"], acl_entry["permissions"], mode
+        )
