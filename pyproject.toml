@@ -1,6 +1,6 @@
 [project]
 name = "pyfacl"
-version = "1.0.0"
+version = "1.1.0"
 description = "Package to manage access control using POSIX ACLs"
 authors = [
     {name = "tobiaspk",email = "tobiaspk1@gmail.com"}
@@ -9,7 +9,11 @@ license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "typer>=0.15.0",
 ]
+
+[project.scripts]
+pyfacl = "pyfacl.cli:app"
 
 [project.optional-dependencies]
 dev = [
