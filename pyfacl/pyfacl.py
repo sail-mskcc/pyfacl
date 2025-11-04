@@ -1,4 +1,3 @@
-import logging
 import subprocess
 
 from pyfacl import logger
@@ -13,9 +12,7 @@ class FACL:
         """
         Initialize the FACL object. Args are used for debugging and testing.
         """
-        self.logger = logger.setup_logger(
-            __name__, level=logging.INFO if v == 0 else logging.DEBUG
-        )
+        self.logger = logger.logger_basic(__name__, v)
         self.is_init = False
         self.facl = _facl
         self.path = ""
@@ -24,7 +21,7 @@ class FACL:
         self.flags = ""
         self.acls = []
 
-    def parse(self, path: str):
+    def parse(self, path: str) -> None:
         """
         Parse the FACL for the given file or directory path.
         Args:
@@ -86,19 +83,31 @@ class FACL:
         ```
         """
         patterns = {
-            "path": "# file: ",
-            "owner": "# owner: ",
-            "group": "# group: ",
-            "flags": "# flags: ",
+            "path": {
+                "pattern": "# file: ",
+                "required": True,
+            },
+            "owner": {
+                "pattern": "# owner: ",
+                "required": True,
+            },
+            "group": {
+                "pattern": "# group: ",
+                "required": True,
+            },
+            "flags": {
+                "pattern": "# flags: ",
+                "required": False,
+            },
         }
         for key, pattern in patterns.items():
-            if pattern not in self.facl:
+            if pattern["required"] and pattern["pattern"] not in self.facl:
                 self.logger.warning(
-                    f"Metadata pattern '{pattern}' not found in FACL output."
+                    f"Metadata pattern '{pattern['pattern']}' not found in FACL output."
                 )
                 continue
             for line in self.facl.splitlines():
-                if line.startswith(pattern):
+                if line.startswith(pattern["pattern"]):
                     setattr(self, key, line.split(":", 1)[1].strip())
 
     def _parse_acl(self, acl_line: str):
@@ -182,6 +191,7 @@ class FACL:
             "type": acl_type,
             "name": name,
             "permissions": permissions,
+            "line": acl_line,
         }
         return acl_entry
 
@@ -312,7 +322,7 @@ class FACL:
         self.logger.warning(msg)
         return None
 
-    def has_permission(self, acl: str, mode: str = "at_least") -> bool:
+    def has_permission(self, acl: str, mode: str) -> bool:
         """
         Check if a specific user or group has a certain permission.
         Users are checked first, then groups, and finally 'other'.

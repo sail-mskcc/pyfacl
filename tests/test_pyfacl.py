@@ -112,7 +112,10 @@ def test_parse_acls(facl_fixture):
     ]
 
     for acl, expected in zip(facl.acls, expected_acls):
-        assert acl == expected
+        assert acl["default"] == expected["default"]
+        assert acl["type"] == expected["type"]
+        assert acl["name"] == expected["name"]
+        assert acl["permissions"] == expected["permissions"]
 
 
 def test_has_permission(facl_fixture):
