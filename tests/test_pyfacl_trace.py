@@ -1,47 +1,7 @@
-import pytest
-
 from pyfacl import FACLTrace
 
 
-def generate_facl_str(path, owner, group, custom_acls=[]):
-    """
-    Always default to user::rwx, group::r-x, other::--x plus any custom ACLs.
-    """
-    facl_lines = [
-        f"# file: {path}",
-        f"# owner: {owner}",
-        f"# group: {group}",
-        "# flags: -s-",
-        "user::rwx",
-        "group::r-x",
-        "other::--x",
-    ]
-    facl_lines.extend(custom_acls)
-    return "\n".join(facl_lines) + "\n"
-
-
-@pytest.fixture
-def pytest_acls_fixture():
-    """
-    Create fixture to simulate a directory hierarchy with ACLs for testing FACLTrace
-    """
-    pytest_acls = {
-        "/": generate_facl_str("/", "root", "group1", ["user:user1:rwx"]),
-        "/home": generate_facl_str("/home", "root", "group1", ["user:user1:rwx"]),
-        "/home/user1": generate_facl_str(
-            "/home/user1", "user1", "group1", ["user:root:r-x"]
-        ),
-        "/home/user1/project": generate_facl_str(
-            "/home/user1/project",
-            "user1",
-            "group1",
-            ["user:root:r-x", "group:group2:r-x"],
-        ),
-    }
-    return pytest_acls
-
-
-def test_facl_trace(pytest_acls_fixture):
+def test_facl_trace(acls_fixture):
     facl_trace = FACLTrace(v=0)
 
     # test user1
@@ -49,7 +9,7 @@ def test_facl_trace(pytest_acls_fixture):
         path="/home/user1/project",
         acl="user:user1:rwx",
         mode="at_least",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     trace_expected = {
@@ -64,7 +24,7 @@ def test_facl_trace(pytest_acls_fixture):
         path="/home/user1/project",
         acl="user:root:rwx",
         mode="at_least",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     trace_expected = {
@@ -87,7 +47,7 @@ def test_facl_trace(pytest_acls_fixture):
         path="/home/user1/project",
         acl="user:root:r-x",
         mode="at_most",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     trace_expected = {
@@ -110,7 +70,7 @@ def test_facl_trace(pytest_acls_fixture):
         path="/home/user1/project",
         acl="group:group2:r-x",
         mode="at_least",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     trace_expected = {
@@ -129,7 +89,7 @@ def test_facl_trace(pytest_acls_fixture):
         assert entry["has_permission"] is expected["has_permission"]
 
 
-def test_facl_trace_permissions(pytest_acls_fixture):
+def test_facl_trace_permissions(acls_fixture):
     facl_trace = FACLTrace(v=0)
 
     # test user1 exact
@@ -137,7 +97,7 @@ def test_facl_trace_permissions(pytest_acls_fixture):
         path="/home/user1/project",
         acl="user:user1:rwx",
         mode="exact",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     # test user1 exact no match
@@ -145,7 +105,7 @@ def test_facl_trace_permissions(pytest_acls_fixture):
         path="/home/user1/project",
         acl="user:user1:r-x",
         mode="exact",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     # test user1 at least
@@ -153,7 +113,7 @@ def test_facl_trace_permissions(pytest_acls_fixture):
         path="/home/user1/project",
         acl="user:user1:r-x",
         mode="at_least",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     # test user1 at most
@@ -161,7 +121,7 @@ def test_facl_trace_permissions(pytest_acls_fixture):
         path="/home/user1/project",
         acl="user:user1:r-x",
         mode="at_most",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     # test group1 exact
@@ -169,7 +129,7 @@ def test_facl_trace_permissions(pytest_acls_fixture):
         path="/home/user1/project",
         acl="group:group1:r-x",
         mode="exact",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     # test group1 at least
@@ -177,7 +137,7 @@ def test_facl_trace_permissions(pytest_acls_fixture):
         path="/home/user1/project",
         acl="group:group1:--x",
         mode="at_least",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     # test group2 at least
@@ -185,7 +145,7 @@ def test_facl_trace_permissions(pytest_acls_fixture):
         path="/home/user1/project",
         acl="group:group2:--x",
         mode="at_least",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     # test group2 at most (no write)
@@ -193,7 +153,7 @@ def test_facl_trace_permissions(pytest_acls_fixture):
         path="/home/user1/project",
         acl="group:group2:rwx",
         mode="at_most",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )
 
     # test group2
@@ -201,5 +161,5 @@ def test_facl_trace_permissions(pytest_acls_fixture):
         path="/home/user1/project",
         acl="group:group2:--x",
         mode="at_most",
-        _pytest_acls=pytest_acls_fixture,
+        _pytest_acls=acls_fixture,
     )

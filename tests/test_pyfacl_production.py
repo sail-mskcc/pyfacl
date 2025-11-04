@@ -1,21 +1,6 @@
-import os
-import tempfile
-
 import pytest
 
 from pyfacl import FACL
-
-
-@pytest.fixture
-def tempfile_with_acl():
-    filepath = tempfile.NamedTemporaryFile(delete=False)
-
-    # add 'other' ACL entry
-    os.system(f"setfacl -m o::r-x {filepath.name}")
-    yield filepath.name
-
-    # cleanup
-    os.remove(filepath.name)
 
 
 @pytest.mark.production
