@@ -26,7 +26,7 @@ class FACLTrace:
         Returns:
             List[dict]: List of dictionaries with applicable ACLs, path, and permission
         """
-        applicable_acls = []
+        trace = []
         current_path = path
         if not current_path.startswith("/"):
             current_path = os.path.abspath(current_path)
@@ -56,7 +56,7 @@ class FACLTrace:
                 "applicable_acl": applicable_acl,
                 "has_permission": has_permission,
             }
-            applicable_acls.append(trace_entry)
+            trace.append(trace_entry)
 
             # move up one directory
             parent_path = os.path.dirname(current_path)
@@ -64,20 +64,27 @@ class FACLTrace:
                 break
             current_path = parent_path
 
-        applicable_acls.reverse()
-        return applicable_acls
+        # reverse and add index
+        trace.reverse()
+        for i, entry in enumerate(trace):
+            entry["index"] = i
+        return trace
 
-    def _print_permission(
-        self, path: str, applicable_acl: dict, has_permission: bool
-    ) -> None:
+    def _print_permission(self, trace_entry: dict) -> None:
         """
         Print the permission trace for a given path.
         """
         color = {
             True: "\033[92m",  # Green for granted
             False: "\033[91m",  # Red for denied
-        }[has_permission]
-        self.print.info(f"{color}{applicable_acl["line"]} {path}\033[0m")
+        }[trace_entry["has_permission"]]
+        self.print.info(
+            (
+                f"{color}{trace_entry['index']}) "
+                f"{trace_entry['applicable_acl']['line']} "
+                f"{trace_entry['path']}\033[0m"
+            )
+        )
 
     def has_permission(
         self, path: str, acl: str, mode: str, _pytest_acls: dict = None
@@ -92,7 +99,5 @@ class FACLTrace:
         for entry in trace:
             if not entry["has_permission"]:
                 has = False
-            self._print_permission(
-                entry["path"], entry["applicable_acl"], entry["has_permission"]
-            )
+            self._print_permission(entry)
         return has
