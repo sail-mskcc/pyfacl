@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 from pyfacl import logger
@@ -58,10 +59,18 @@ class FACL:
         Returns:
             str: The raw FACL output from the `getfacl` command.
         """
+
+        # facl available
         if not self._facl_available():
             self.logger.error("The 'getfacl' command is not available on this system.")
             return ""
+
         try:
+            # prep path
+            if not path.startswith("/"):
+                path = os.path.abspath(path)
+
+            # get facl
             result = subprocess.run(
                 ["getfacl", path], capture_output=True, text=True, check=True
             )

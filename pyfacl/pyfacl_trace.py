@@ -28,6 +28,8 @@ class FACLTrace:
         """
         applicable_acls = []
         current_path = path
+        if not current_path.startswith("/"):
+            current_path = os.path.abspath(current_path)
 
         while True:
 
