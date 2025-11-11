@@ -19,6 +19,20 @@ The CLI tool checks permissions through the entire directory hierarchy, checks w
 pyfacl trace /path/to/file user:<username>:r-x --mode exact
 ```
 
+Example output:
+```bash
+$ pyfacl trace /data1/collab002/sail/example/permission/folder user:moormana:r-x
+0) ✅ other::r-x /
+1) ✅ other::r-x /data1
+2) ✅ group::rwx /data1/collab002
+3) ✅ group::r-x /data1/collab002/sail
+4) ✅ group::r-x /data1/collab002/sail/example
+5) ❌ user:moormana:--x /data1/collab002/sail/example/permission
+6) ✅ group::r-x /data1/collab002/sail/example/permission/folder
+```
+
+In this trace, items 0-4 and 6 show ✅ **passing** permissions, while item 5 shows ❌ **failing** permissions where the user only has execute (`--x`) but needs read+execute (`r-x`).
+
 ### Python
 
 #### Check one file/folder permission

@@ -31,7 +31,4 @@ myst_enable_extensions = [
 ]
 
 # Source file suffixes
-source_suffix = {
-    ".rst": None,
-    ".md": "myst_parser",
-}
+source_suffix = [".rst", ".md"]
