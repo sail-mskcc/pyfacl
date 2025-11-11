@@ -7,8 +7,7 @@ from pyfacl import FACL
 def test_production_acl(tempfile_with_acl):
 
     # setup
-    facl = FACL()
-    facl.parse(tempfile_with_acl)
+    facl = FACL(path=tempfile_with_acl)
 
     # check 'other' permissions
     assert facl.has_permission("other::r-x", mode="exact")

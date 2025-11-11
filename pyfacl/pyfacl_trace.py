@@ -8,12 +8,13 @@ class FACLTrace:
     Analyze and trace ACLs through directory hierarchy.
     """
 
-    def __init__(self, v: int = 0) -> None:
+    def __init__(self, path: str = None, v: int = 0) -> None:
         self.logger = logger.logger_basic(__name__, v)
         self.print = logger.logger_print(v)
         self.v = v
+        self.path = path
 
-    def _trace(self, path: str, acl: str, mode: str, _pytest_acls: dict = None) -> list:
+    def _trace(self, acl: str, mode: str, _pytest_acls: dict = None) -> list:
         """
         Trace and return all applicable ACLs for the given path.
 
@@ -27,7 +28,7 @@ class FACLTrace:
             List[dict]: List of dictionaries with applicable ACLs, path, and permission
         """
         trace = []
-        current_path = path
+        current_path = self.path
         if not current_path.startswith("/"):
             current_path = os.path.abspath(current_path)
 
@@ -35,8 +36,7 @@ class FACLTrace:
 
             # get info (from pytest dict or by parsing)
             if _pytest_acls is None:
-                facl = FACL(v=self.v)
-                facl.parse(current_path)
+                facl = FACL(path=current_path, v=self.v)
             else:
                 facl_str = _pytest_acls[current_path]
                 facl = FACL(v=self.v, _facl=facl_str)
@@ -86,14 +86,12 @@ class FACLTrace:
             )
         )
 
-    def has_permission(
-        self, path: str, acl: str, mode: str, _pytest_acls: dict = None
-    ) -> bool:
+    def has_permission(self, acl: str, mode: str, _pytest_acls: dict = None) -> bool:
         """
         Check if a specific user or group has a certain permission at the given path.
         """
 
-        trace = self._trace(path, acl, mode, _pytest_acls=_pytest_acls)
+        trace = self._trace(acl, mode, _pytest_acls=_pytest_acls)
 
         has = True
         for entry in trace:

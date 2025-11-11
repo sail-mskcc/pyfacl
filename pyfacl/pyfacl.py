@@ -9,27 +9,31 @@ class FACL:
     Represents a POSIX File Access Control List (FACL) for a given file or directory.
     """
 
-    def __init__(self, v: int = 0, _facl: str = ""):
+    def __init__(self, path: str = None, v: int = 0, _facl: str = None):
         """
         Initialize the FACL object. Args are used for debugging and testing.
         """
         self.logger = logger.logger_basic(__name__, v)
         self.is_init = False
         self.facl = _facl
-        self.path = ""
+        self.path = path
         self.owner = ""
         self.group = ""
         self.flags = ""
         self.acls = []
+        if _facl is None:
+            if not path:
+                raise ValueError("Parameter 'path' must be provided.")
+            self.parse()
 
-    def parse(self, path: str) -> None:
+    def parse(self) -> None:
         """
         Parse the FACL for the given file or directory path.
         Args:
             path (str): The file or directory path.
         """
         self.is_init = True
-        self.facl = self._get_facl(path)
+        self.facl = self._get_facl(self.path)
         self._parse_metadata()
         self._parse_acls()
 
