@@ -21,8 +21,8 @@ def permission_trace(
     """
     Trace and analyze ACL permissions through a directory hierarchy.
     """
-    facl_trace = FACLTrace(v=1)
-    has_permission = facl_trace.has_permission(path, acl, mode)
+    facl_trace = FACLTrace(path=path, v=1)
+    has_permission = facl_trace.has_permission(acl, mode)
     if has_permission:
         typer.echo(f"Permission '{mode}' for ACL '{acl}' is granted on path '{path}'.")
     else:
