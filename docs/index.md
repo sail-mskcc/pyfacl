@@ -31,22 +31,29 @@ pip install pyfacl
 
 ## Python API
 
+### Check one file/folder permission
+
 ```python
 from pyfacl import FACL
 
 # Parse ACLs for a file
-facl = FACL()
-facl.parse("/path/to/file")
-facl.parse("/home/krauset")
+facl = FACL(path="/path/to/file")
 
 # Check permissions
 has_read = facl.has_permission("user:alice:r--", mode="at_least")
 has_exact = facl.has_permission("user:bob:rwx", mode="exact")
+```
 
-# Check trace
+### Check trace through directory hierarchy
+
+```python
 from pyfacl import FACLTrace
-trace = FACLTrace()
-result = trace.has_permission("/deep/path/to/file", "user:alice:rwx")
+
+# Initialize FACLTrace for a directory
+facl_trace = FACLTrace(path="/path/to/directory", v=1)
+
+# Trace permissions for a specific user
+trace_result = facl_trace.has_permission("user:username:r-x", mode="at_least")
 ```
 
 ## CLI Commands
