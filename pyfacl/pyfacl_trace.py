@@ -78,9 +78,13 @@ class FACLTrace:
             True: "\033[92m",  # Green for granted
             False: "\033[91m",  # Red for denied
         }[trace_entry["has_permission"]]
+        emoji = {
+            True: "✅",
+            False: "❌",
+        }[trace_entry["has_permission"]]
         self.print.info(
             (
-                f"{color}{trace_entry['index']}) "
+                f"{color}{trace_entry['index']}) {emoji} "
                 f"{trace_entry['applicable_acl']['line']} "
                 f"{trace_entry['path']}\033[0m"
             )
