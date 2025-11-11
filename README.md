@@ -2,7 +2,6 @@
 
 [![PyPI version](https://badge.fury.io/py/pyfacl.svg)](https://badge.fury.io/py/pyfacl)
 [![Python](https://img.shields.io/pypi/pyversions/pyfacl.svg)](https://pypi.org/project/pyfacl/)
-[![Tests](https://github.com/sail-mskcc/pyfacl/actions/workflows/test.yml/badge.svg)](https://github.com/sail-mskcc/pyfacl/actions/workflows/test.yml)
 [![Documentation Status](https://readthedocs.org/projects/pyfacl/badge/?version=latest)](https://pyfacl.readthedocs.io/en/latest/?badge=latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
