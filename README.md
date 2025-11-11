@@ -11,6 +11,16 @@ pip install pyfacl
 
 ## Usage
 
+### CLI
+
+The CLI tool checks permissions through the entire directory hierarchy, checks whether the permissions are met and identifies which permission rule applies at each level.
+
+```bash
+pyfacl /path/to/file user:<username>:r-x --mode exact
+```
+
+### Python
+
 ```python
 from pyfacl import FACL
 
