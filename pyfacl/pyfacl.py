@@ -145,8 +145,7 @@ class FACL:
                 f"ACL line does not have the correct number of fields (3 or 4):"
                 f"\nLine: {acl_line}\nFields: {acl_split}"
             )
-            self.logger.warning(msg)
-            return None
+            raise ValueError(msg)
 
         # default
         default = len(acl_split) == 4
