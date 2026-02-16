@@ -46,9 +46,9 @@ class FACLTrace:
 
             # check for applicable ACL
             applicable_acl = facl.get_applicable_acl(acl)
-            if not applicable_acl:
-                break
-            has_permission = facl.has_permission(acl, mode)
+            has_permission = False
+            if applicable_acl:
+                has_permission = facl.has_permission(acl, mode)
 
             # store info
             trace_entry = {
@@ -57,6 +57,10 @@ class FACLTrace:
                 "has_permission": has_permission,
             }
             trace.append(trace_entry)
+
+            # stop traversing if no applicable ACL found
+            if not applicable_acl:
+                break
 
             # move up one directory
             parent_path = os.path.dirname(current_path)
@@ -82,10 +86,17 @@ class FACLTrace:
             True: "✅",
             False: "❌",
         }[trace_entry["has_permission"]]
+        
+        # Handle case where no applicable ACL was found
+        if trace_entry["applicable_acl"] is None:
+            acl_info = "NO_ACL"
+        else:
+            acl_info = trace_entry['applicable_acl']['line']
+        
         self.print.info(
             (
                 f"{color}{trace_entry['index']}) {emoji} "
-                f"{trace_entry['applicable_acl']['line']} "
+                f"{acl_info} "
                 f"{trace_entry['path']}\033[0m"
             )
         )

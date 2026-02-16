@@ -60,6 +60,23 @@ def acls_fixture():
 
 
 @pytest.fixture
+def acls_fixture_with_file():
+    """
+    Create fixture with a file that has no applicable ACL for a specific user.
+    This tests the case where getfacl fails or returns no ACLs.
+    """
+    pytest_acls = {
+        "/": generate_facl_str("/", "root", "group1", ["user:user2:rwx"]),
+        "/home": generate_facl_str("/home", "root", "group1", ["user:user2:rwx"]),
+        "/home/user1": generate_facl_str(
+            "/home/user1", "user1", "group1", ["user:user2:rwx"]
+        ),
+        "/home/user1/file.txt": "",  # Empty ACL simulates getfacl failure
+    }
+    return pytest_acls
+
+
+@pytest.fixture
 def tempfile_with_acl():
     filepath = tempfile.NamedTemporaryFile(delete=False)
 
