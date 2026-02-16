@@ -12,16 +12,12 @@ import pytest
 
 def test_getfacl_available():
     """Test that getfacl command is available in the system."""
-    assert (
-        shutil.which("getfacl") is not None
-    ), "getfacl command not found in PATH"
+    assert shutil.which("getfacl") is not None, "getfacl command not found in PATH"
 
 
 def test_setfacl_available():
     """Test that setfacl command is available in the system."""
-    assert (
-        shutil.which("setfacl") is not None
-    ), "setfacl command not found in PATH"
+    assert shutil.which("setfacl") is not None, "setfacl command not found in PATH"
 
 
 def test_getfacl_version():
