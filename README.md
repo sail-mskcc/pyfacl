@@ -23,22 +23,35 @@ pip install pyfacl
 The CLI tool checks permissions through the entire directory hierarchy, checks whether the permissions are met and identifies which permission rule applies at each level.
 
 ```bash
-pyfacl trace /path/to/file user:<username>:r-x --mode exact
+pyfacl trace /path/to/file user:<user2>:r-x --mode exact
 ```
 
 Example output:
 ```bash
-$ pyfacl trace /data1/collab002/sail/example/permission/folder user:moormana:r-x
+$ pyfacl trace /data1/collab002/sail/example/permission/folder user:user2:r-x
 0) ✅ other::r-x /
 1) ✅ other::r-x /data1
 2) ✅ group::rwx /data1/collab002
 3) ✅ group::r-x /data1/collab002/sail
 4) ✅ group::r-x /data1/collab002/sail/example
-5) ❌ user:moormana:--x /data1/collab002/sail/example/permission
+5) ❌ user:user2:--x /data1/collab002/sail/example/permission
 6) ✅ group::r-x /data1/collab002/sail/example/permission/folder
 ```
 
 In this trace, items 0-4 and 6 show ✅ **passing** permissions, while item 5 shows ❌ **failing** permissions where the user only has execute (`--x`) but needs read+execute (`r-x`).
+
+However, often we only care about if the user has the required permission for the final file/directory, not the full trace. For that, we can use the `has` command:
+
+```bash
+$ pyfacl has /path/to/file user:<user2>:r-x --mode exact
+0) ✅ other::r-x /
+1) ✅ other::r-x /data1
+2) ✅ group::rwx /data1/collab002
+3) ✅ group::r-x /data1/collab002/sail
+4) ✅ group::r-x /data1/collab002/sail/example
+5) ✅ user:user2:--x /data1/collab002/sail/example/permission
+6) ✅ group::r-x /data1/collab002/sail/example/permission/folder
+```
 
 ### Python
 
@@ -51,9 +64,9 @@ from pyfacl import FACL
 facl = FACL(path="/path/to/file")
 
 # Check permissions with different modes
-facl.has_permission("user:username:r-x", mode="exact")     # exact match
-facl.has_permission("user:username:r--", mode="at_least") # has at least read
-facl.has_permission("user:username:rwx", mode="at_most")  # has at most rwx
+facl.has_permission("user:user2:r-x", mode="exact")     # exact match
+facl.has_permission("user:user2:r--", mode="at_least") # has at least read
+facl.has_permission("user:user2:rwx", mode="at_most")  # has at most rwx
 ```
 
 #### Check trace through directory hierarchy
@@ -65,7 +78,19 @@ from pyfacl import FACLTrace
 facl_trace = FACLTrace(path="/path/to/directory", v=1)
 
 # Trace permissions for a specific user
-trace_result = facl_trace.has_permission("user:username:r-x", mode="at_least")
+trace_result = facl_trace.has_permission("user:user2:r-x", mode="at_least")
+```
+
+#### Check if user/group has permission for a file/directory
+
+```python
+from pyfacl import FACLHas
+
+# Initialize FACLHas for a file/directory
+facl_has = FACLHas(path="/path/to/file")
+
+# Check if user/group has the specified permission
+has_permission = facl_has.has_permission("user:user2:r-x", mode="at_least")
 ```
 
 ### Permission Modes
