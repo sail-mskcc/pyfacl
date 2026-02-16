@@ -150,3 +150,44 @@ def test_facl_trace_permissions(acls_fixture):
         mode="at_most",
         _pytest_acls=acls_fixture,
     )
+
+
+def test_facl_trace_file_without_applicable_acl(acls_fixture_with_file):
+    """
+    Test that a file without an applicable ACL is still included in the trace.
+    This is the bug fix: previously, if the file had no applicable ACL
+    (e.g., getfacl failed or returned empty), it would break immediately
+    and not include the file in the trace.
+    """
+    facl_trace = FACLTrace(path="/home/user1/file.txt", v=0)
+
+    # test user2 - the file has empty ACL (simulating getfacl failure)
+    trace_result = facl_trace._trace(
+        acl="user:user2:rwx",
+        mode="at_least",
+        _pytest_acls=acls_fixture_with_file,
+    )
+
+    # The file should be included even though it has no ACLs
+    trace_paths = [entry["path"] for entry in trace_result]
+
+    # Assert that the file is in the trace (this would fail before the fix)
+    assert (
+        "/home/user1/file.txt" in trace_paths
+    ), "File should be included in trace even without ACLs"
+
+    # Verify that we have exactly one entry (the file)
+    # The trace includes the file and stops since no applicable ACL was found
+    assert (
+        len(trace_result) == 1
+    ), "Trace should contain only the file since no applicable ACL was found"
+
+    # Verify the file entry has no applicable ACL
+    file_entry = trace_result[0]
+    assert file_entry["path"] == "/home/user1/file.txt"
+    assert (
+        file_entry["applicable_acl"] is None
+    ), "File with no ACLs should have None as applicable_acl"
+    assert (
+        file_entry["has_permission"] is False
+    ), "File with no ACLs should have False for has_permission"
