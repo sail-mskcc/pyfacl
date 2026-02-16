@@ -34,7 +34,6 @@ def test_getfacl_version():
             check=True,
             timeout=5,
         )
-        assert result.returncode == 0
         assert len(result.stdout) > 0 or len(result.stderr) > 0
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         pytest.fail(f"getfacl --version failed: {e}")
@@ -50,7 +49,6 @@ def test_setfacl_version():
             check=True,
             timeout=5,
         )
-        assert result.returncode == 0
         assert len(result.stdout) > 0 or len(result.stderr) > 0
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         pytest.fail(f"setfacl --version failed: {e}")
