@@ -1,5 +1,3 @@
-import pytest
-
 from pyfacl import FACLTrace
 
 
@@ -174,22 +172,22 @@ def test_facl_trace_file_without_applicable_acl(acls_fixture_with_file):
     trace_paths = [entry["path"] for entry in trace_result]
 
     # Assert that the file is in the trace (this would fail before the fix)
-    assert "/home/user1/file.txt" in trace_paths, (
-        "File should be included in trace even without ACLs"
-    )
-    
+    assert (
+        "/home/user1/file.txt" in trace_paths
+    ), "File should be included in trace even without ACLs"
+
     # Verify that we have exactly one entry (the file)
     # The trace stops after encountering a file with no applicable ACL
-    assert len(trace_result) == 1, (
-        "Trace should contain only the file since no applicable ACL was found"
-    )
+    assert (
+        len(trace_result) == 1
+    ), "Trace should contain only the file since no applicable ACL was found"
 
     # Verify the file entry has no applicable ACL
     file_entry = trace_result[0]
     assert file_entry["path"] == "/home/user1/file.txt"
-    assert file_entry["applicable_acl"] is None, (
-        "File with no ACLs should have None as applicable_acl"
-    )
-    assert file_entry["has_permission"] is False, (
-        "File with no ACLs should have False for has_permission"
-    )
+    assert (
+        file_entry["applicable_acl"] is None
+    ), "File with no ACLs should have None as applicable_acl"
+    assert (
+        file_entry["has_permission"] is False
+    ), "File with no ACLs should have False for has_permission"

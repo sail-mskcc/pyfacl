@@ -86,13 +86,13 @@ class FACLTrace:
             True: "✅",
             False: "❌",
         }[trace_entry["has_permission"]]
-        
+
         # Handle case where no applicable ACL was found
         if trace_entry["applicable_acl"] is None:
             acl_info = "NO_ACL"
         else:
-            acl_info = trace_entry['applicable_acl']['line']
-        
+            acl_info = trace_entry["applicable_acl"]["line"]
+
         self.print.info(
             (
                 f"{color}{trace_entry['index']}) {emoji} "
