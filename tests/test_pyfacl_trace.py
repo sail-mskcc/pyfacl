@@ -177,7 +177,7 @@ def test_facl_trace_file_without_applicable_acl(acls_fixture_with_file):
     ), "File should be included in trace even without ACLs"
 
     # Verify that we have exactly one entry (the file)
-    # The trace stops after encountering a file with no applicable ACL
+    # The trace includes the file and stops since no applicable ACL was found
     assert (
         len(trace_result) == 1
     ), "Trace should contain only the file since no applicable ACL was found"

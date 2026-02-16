@@ -46,6 +46,8 @@ class FACLTrace:
 
             # check for applicable ACL
             applicable_acl = facl.get_applicable_acl(acl)
+            # Default to False when no applicable ACL exists
+            # Only check permission if we have an applicable ACL
             has_permission = False
             if applicable_acl:
                 has_permission = facl.has_permission(acl, mode)
