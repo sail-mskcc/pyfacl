@@ -26,6 +26,12 @@ class FACL:
                 raise ValueError("Parameter 'path' must be provided.")
             self.parse()
 
+        # catch common error that path and acl are mixed up
+        if path is not None and "/" not in path and ":" in path and _facl is None:
+            raise ValueError(
+                f"Path looks like an ACL entry. Please check your input:\nPath: {path}"
+            )
+
     def parse(self) -> None:
         """
         Parse the FACL for the given file or directory path.
