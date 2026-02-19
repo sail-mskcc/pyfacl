@@ -14,6 +14,12 @@ class FACLTrace:
         self.v = v
         self.path = path
 
+        # catch common error that path and acl are mixed up
+        if "/" not in path and ":" in path:
+            raise ValueError(
+                f"Path looks like an ACL entry. Please check your input:\nPath: {path}"
+            )
+
     def _trace(self, acl: str, mode: str, _pytest_acls: dict = None) -> list:
         """
         Trace and return all applicable ACLs for the given path.
