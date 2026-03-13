@@ -95,8 +95,8 @@ def test_has_permission_can_execute(acls_fixture):
 
 
 def test_has_permission_both_flags_raises():
-    """trace and can_execute cannot both be True."""
-    with pytest.raises(ValueError, match="cannot both be True"):
+    """trace and can_execute 'Cannot set both'."""
+    with pytest.raises(ValueError, match="Cannot set both"):
         pyfacl.has_permission(
             "/some/path",
             "user:user1:r-x",

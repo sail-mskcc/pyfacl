@@ -39,7 +39,14 @@ def has_permission(
         ValueError: If both trace and can_execute are True.
     """
     if trace and can_execute:
-        raise ValueError("'trace' and 'can_execute' cannot both be True.")
+        msg = (
+            "Cannot set both 'trace' and 'can_execute' to True:\n"
+            "  - 'trace' requires permissions at every level of the "
+            "directory hierarchy.\n"
+            "  - 'can_execute' requires execute permission on every "
+            "parent directory.\n"
+        )
+        raise ValueError(msg)
 
     if trace:
         return FACLTrace(path=path, v=v).has_permission(
